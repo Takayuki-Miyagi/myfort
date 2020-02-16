@@ -19,7 +19,7 @@ module general
   private :: GetLength_imap, append_imap, print_imap, Get_imap, Search_imap
   private :: GetLength_cmap, append_cmap, print_cmap, Get_cmap, Search_cmap
   private :: GetLength_dmap, append_dmap, print_dmap, Get_dmap, Search_dmap
-  private :: search_key
+  private :: search_key, skip_comments
 
   type :: sys
   contains
@@ -32,6 +32,7 @@ module general
     procedure :: split
     procedure :: isfile_stop
     procedure :: isfile_func
+    procedure :: skip_comments
     generic :: isfile => isfile_stop, isfile_func
   end type sys
 
@@ -232,6 +233,18 @@ contains
     inquire(file=f, exist=ex)
   end function isfile_func
 
+  subroutine skip_comments(this, iunit, comment)
+    class(sys), intent(in) :: this
+    integer(int32), intent(in) :: iunit
+    character(*), intent(in) :: comment
+    character(20) :: line
+    read(iunit,'(a)') line
+    do while  (this%find(line, comment))
+      read(iunit,'(a)') line
+    end do
+    backspace(iunit)
+  end subroutine skip_comments
+
   function GetLength_ilist(this) result(n)
     class(iList), intent(in) :: this
     integer(int32) :: n
@@ -415,6 +428,7 @@ contains
     integer(int32) :: r
     integer(int32) :: n, pos
     n = this%GetLen()
+    r = 0
     if(n == 0) then
       write(*,*) 'imap is empty'
       return
@@ -612,6 +626,7 @@ contains
     real(real64) :: r
     integer(int32) :: n, pos
     n = this%GetLen()
+    r = 0.d0
     if(n == 0) then
       write(*,*) 'imap is empty'
       return

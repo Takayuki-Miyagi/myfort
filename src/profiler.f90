@@ -120,8 +120,6 @@ contains
     r = this%memories%get(key)
   end function GetTargetMemory
 
-  ! call timer%cmemory before using
-  ! msg is object name
   subroutine CountUpMemory(this, key, memory_in)
     class(prof), intent(inout) :: this
     character(*), intent(in) :: key
