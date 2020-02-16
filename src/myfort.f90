@@ -11,5 +11,6 @@ module myfort
   use profiler
   use wave_functions
   use linear_algebra
+  use iteration_methods
 
 end module myfort

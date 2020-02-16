@@ -137,7 +137,6 @@ contains
   real(real32) function Nrm(a) result(b)
     class(SVec), intent(in) :: a
     integer(int32) :: n
-    real(real32) :: snrm2
     b = 0.0
     n = a%n_size
     if(n < 1) return
