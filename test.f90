@@ -10,7 +10,7 @@ program test
   !call test_DVec()
   !call test_DMat()
 
-  !call test_wfs()
+  call test_wfs()
   call test_iteration_methods()
 
   call timer%prt()
@@ -61,14 +61,15 @@ contains
 
   subroutine test_wfs()
     integer :: i, nmesh = 1000
-    real(real64) :: rmax=1.d3
+    real(real64) :: rmax=1.d-3
     integer :: N=20
-    integer :: L=20
+    integer :: L=40
     write(*,*) "# test wave function "
     open(15,file="wf.txt")
     do i = 1, nmesh
       !write(15,*) i, rmax/dble(nmesh) * dble(i), laguerre_radial_wf_norm(n,l,1.d0, rmax/dble(nmesh) * dble(i))**2
-      write(15,*) i, rmax/dble(nmesh) * dble(i), mom_laguerre_radial_wf_norm(n,l,1.d0, rmax/dble(nmesh) * dble(i))**2
+      !write(15,*) i, rmax/dble(nmesh) * dble(i), mom_laguerre_radial_wf_norm(n,l,1.d0, rmax/dble(nmesh) * dble(i))**2
+      write(15,*) i, rmax/dble(nmesh) * dble(i), spherical_bessel( L, rmax/dble(nmesh)*dble(i) )
     end do
   end subroutine test_wfs
 
@@ -101,5 +102,7 @@ contains
     real(8), intent(in) :: x(:)
     real(8), intent(out) :: f(:)
     f(:) = cos(x(:))
+    if(size(f) < 2) return
+    f(2) = sin(x(2))
   end subroutine func
 end program test

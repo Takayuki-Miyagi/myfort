@@ -50,7 +50,7 @@ OBJS_ALL = $(OBJS)
 #--------------------------------------------------
 # Rules
 #--------------------------------------------------
-all: dirs libmyfort
+all: dirs libmyfort test
 libmyfort: $(OBJS_ALL)
 	$(FC) $(FFLAGS) $(DFLAGS) -shared -fpic -o libmyfort.so $^ $(LFLAGS)
 	@echo "#####################################################################################"

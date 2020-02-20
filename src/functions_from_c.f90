@@ -1,5 +1,6 @@
 module functions_from_c
   use, intrinsic :: iso_c_binding
+  use, intrinsic :: iso_fortran_env
   implicit none
   !
   ! C interfaces
@@ -55,12 +56,12 @@ module functions_from_c
     end function ln_gamma
 
     ! spherical bessel function j_l(x)
-    function spherical_bessel(l,x) bind(c,name='gsl_sf_bessel_jl')
+    function spherical_bessel_c(l,x) bind(c,name='gsl_sf_bessel_jl')
       import c_int, c_double
       integer(c_int), value, intent(in) :: l
       real(c_double), value, intent(in) :: x
-      real(c_double) :: spherical_bessel
-    end function spherical_bessel
+      real(c_double) :: spherical_bessel_c
+    end function spherical_bessel_c
 
     ! Legendre polynomial P_l(x)
     function legendre_polynomial(l,x) bind(c,name='gsl_sf_legendre_Pl')
@@ -193,14 +194,14 @@ contains
     !  Clebsch-Gordan coefficient
     !  dcg(j1, m1, j2, m2, j3, m3)
     !  = ((j1)/2, (m1)/2, (j2)/2, (m2)/2 | (j3)/2, (m3)/2)
-    integer, intent(in) :: j1, j2, j3, m1, m2, m3
-    real(8) :: s
+    integer(int32), intent(in) :: j1, j2, j3, m1, m2, m3
+    real(real64) :: s
     s = coupling_3j(j1,j2,j3,m1,m2,-m3) * sqrt(dble(j3+1)) * (-1.d0) ** ((j1-j2+m3)/2)
   end function dcg
 
   function tjs(j1, j2, j3, m1, m2, m3) result(r)
-    real(8) :: r
-    integer, intent(in) :: j1, j2, j3, m1, m2, m3
+    real(real64) :: r
+    integer(int32), intent(in) :: j1, j2, j3, m1, m2, m3
     r = coupling_3j(j1,j2,j3,m1,m2,m3)
   end function tjs
 
@@ -209,8 +210,8 @@ contains
     !  6j coefficient
     !  d6j(j1, j2, j3, l1, l2, l3) = {(j1)/2 (j2)/2 (j3)/2}
     !                                {(l1)/2 (l2)/3 (l3)/2}
-    integer, intent(in) :: j1, j2, j3, l1, l2, l3
-    real(8) :: s
+    integer(int32), intent(in) :: j1, j2, j3, l1, l2, l3
+    real(real64) :: s
     s = coupling_6j(j1,j2,j3,l1,l2,l3)
   end function sjs
 
@@ -221,8 +222,8 @@ contains
     !    {(j11)/2 (j12)/2 (j13)/2}
     !  = {(j21)/2 (j22)/2 (j23)/2}
     !    {(j31)/2 (j32)/2 (j33)/2}
-    integer, intent(in) :: j11, j12, j13, j21, j22, j23, j31, j32, j33
-    real(8) :: s
+    integer(int32), intent(in) :: j11, j12, j13, j21, j22, j23, j31, j32, j33
+    real(real64) :: s
     s = coupling_9j(j11,j12,j13,j21,j22,j23,j31,j32,j33)
   end function snj
 
@@ -234,11 +235,11 @@ contains
     ! output :
     ! x     : gauss-legendre mesh points on the interval (x1,x2)
     ! w     : the corresponding weights
-    integer, intent(in) :: n
-    real(8), intent(in) :: x1, x2
-    real(8), intent(out), allocatable :: x(:), w(:)
-    real(8) :: xi, wi
-    integer :: info, i
+    integer(int32), intent(in) :: n
+    real(real64), intent(in) :: x1, x2
+    real(real64), intent(out), allocatable :: x(:), w(:)
+    real(real64) :: xi, wi
+    integer(int32) :: info, i
     type(c_ptr) :: t
 
     if(allocated(x)) deallocate(x)
@@ -262,20 +263,20 @@ contains
     ! output :
     ! x     : gauss-legendre mesh points on the interval (x1,x2)
     ! w     : the corresponding weights
-    integer, intent(in) :: n
-    real(8), intent(in) :: x1, x2
-    real(8), intent(out), allocatable :: x(:), w(:)
+    integer(int32), intent(in) :: n
+    real(real64), intent(in) :: x1, x2
+    real(real64), intent(out), allocatable :: x(:), w(:)
     call fixed_point_quadrature("legendre", n, x, w, a_in=x1, b_in=x2)
   end subroutine gauss_legendre_
 
   subroutine fixed_point_quadrature(quad_name, n, x, w, a_in, b_in, alpha_in, beta_in, weight_renorm)
     character(*), intent(in) :: quad_name
-    integer, intent(in) :: n
-    real(8), intent(in), optional :: a_in, b_in, alpha_in, beta_in
+    integer(int32), intent(in) :: n
+    real(real64), intent(in), optional :: a_in, b_in, alpha_in, beta_in
     logical, intent(in), optional :: weight_renorm
-    real(8), allocatable :: x(:), w(:)
-    real(8) :: a=0.d0, b=0.d0, alpha=0.d0, beta=0.d0
-    integer :: i
+    real(real64), allocatable :: x(:), w(:)
+    real(real64) :: a=0.d0, b=0.d0, alpha=0.d0, beta=0.d0
+    integer(int32) :: i
     type(c_ptr) :: workspace, nodes, weights
     real(c_double), pointer :: x_(:), w_(:)
 
@@ -357,7 +358,7 @@ contains
   function gzip_writeline( f, buf, len) result(p)
     type(c_ptr) :: f, p
     character(*), intent(in) :: buf
-    integer, intent(in) :: len
+    integer(int32), intent(in) :: len
     p = gzip_write( f, trim(buf)//achar(10), len+1)
   end function gzip_writeline
 
@@ -367,9 +368,20 @@ contains
     ! -2 means removing null (0) and line feed (10)
     type(c_ptr) :: f, p
     character(*), intent(inout) :: buf
-    integer, intent(in) :: len
+    integer(int32), intent(in) :: len
     p = gzip_read( f, buf, len)
     buf = buf(1:len_trim(buf) - 2)
   end function gzip_readline
+
+  function spherical_bessel( l, x ) result(r)
+    integer(int32), intent(in) :: l
+    real(real64), intent(in) :: x
+    real(real64) :: a, r
+    r = 0.d0
+    a = exp(-200.d0 / dble(l) * log(10.d0) + dble(2*l+1)/dble(l) * log(dble(2*l+1)) - &
+        & dble(2*l+1)/dble(l) - log(dble(l)) + 1 - log(2.d0) )
+    if(x < a) return
+    r = spherical_bessel_c(l,x)
+  end function spherical_bessel
 end module functions_from_c
 
