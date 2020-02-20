@@ -1,5 +1,5 @@
 module mat_vec_single
-  use general
+  use basic_types
   use vector_single, only: SVec
   use matrix_single, only: SMat
   implicit none

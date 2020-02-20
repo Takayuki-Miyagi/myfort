@@ -1,5 +1,6 @@
 module profiler
   use omp_lib
+  use basic_types
   use general
   implicit none
 

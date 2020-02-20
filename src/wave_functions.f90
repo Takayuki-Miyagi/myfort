@@ -1,7 +1,7 @@
 module wave_functions
+  use basic_types
   use functions_from_c
   use physics_constants
-  use general
   implicit none
 contains
   function ho_radial_wf(n,l,anu,r) result(s)

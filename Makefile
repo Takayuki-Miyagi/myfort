@@ -16,7 +16,7 @@ ifeq ($(FC),gfortran)
     LFLAGS+= -I/usr/local/include -L/usr/local/lib
   endif
   LFLAGS+= -lblas -llapack -lgsl -lz
-  FFLAGS+= -O3 -fopenmp
+  FFLAGS+= -O3 -fopenmp -fPIC
   ifeq ($(DEBUG), on)
     FFLAGS+=-Wall -pedantic -fbounds-check -O -Wuninitialized -fbacktrace
   endif
@@ -52,7 +52,8 @@ OBJS_ALL = $(OBJS)
 #--------------------------------------------------
 all: dirs libmyfort test
 libmyfort: $(OBJS_ALL)
-	$(FC) $(FFLAGS) $(DFLAGS) -shared -fpic -o libmyfort.so $^ $(LFLAGS)
+	#$(FC) $(FFLAGS) $(DFLAGS) -shared -o libmyfort.so $^ $(LFLAGS)
+	$(FC) $(FFLAGS) $(DFLAGS) -shared -o libmyfort.so $^ -shared -fPIC $(LFLAGS)
 	@echo "#####################################################################################"
 	@echo "To complete the installation, do 'make install'."
 	@echo "#####################################################################################"

@@ -1,5 +1,5 @@
 module matrix_double
-  use general
+  use basic_types
   implicit none
   public :: DMat
   public :: MatrixCopyD

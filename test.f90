@@ -2,6 +2,7 @@ program test
   use myfort
   implicit none
   type(sys) :: s
+  type(tree) :: map
   call timer%init()
 
   !call test_SVec()
@@ -10,8 +11,12 @@ program test
   !call test_DVec()
   !call test_DMat()
 
-  call test_wfs()
+  !call test_wfs()
   call test_iteration_methods()
+
+  call add_element(map, "aaaaa", 2)
+  call print_key(map)
+  call print_val(map)
 
   call timer%prt()
 contains

@@ -1,6 +1,6 @@
 module store_couplings
   use omp_lib
-  use general
+  use basic_types
   use profiler
   use functions_from_c
   use angular_momentum_couplings

@@ -1,5 +1,5 @@
 module vector_double
-  use general
+  use basic_types
   implicit none
 
   public :: DVec

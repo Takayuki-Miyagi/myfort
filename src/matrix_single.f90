@@ -1,5 +1,5 @@
 module matrix_single
-  use general
+  use basic_types
   implicit none
 
   public :: SMat

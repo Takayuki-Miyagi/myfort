@@ -1,5 +1,5 @@
 module vector_single
-  use general
+  use basic_types
   implicit none
 
   public :: SVec

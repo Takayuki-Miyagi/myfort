@@ -1,5 +1,5 @@
 module matrix_complex
-  use general
+  use basic_types
   implicit none
   public :: CMat
   public :: MatrixCopyC

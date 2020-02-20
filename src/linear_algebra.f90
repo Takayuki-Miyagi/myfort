@@ -1,5 +1,5 @@
 module linear_algebra
-  use general
+  use basic_types
   use sngl_dble_cmplx
   use vector_single
   use vector_double

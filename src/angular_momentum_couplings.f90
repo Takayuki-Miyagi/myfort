@@ -2,7 +2,7 @@ module angular_momentum_couplings
   !
   ! Most of functions defined here are originally written by the members at the Nuclear Theory group in the University of Tokyo
   !
-  use general
+  use basic_types
   use functions_from_c
   ! cache for Talmi-Moshinsky bracket
   integer(int32), private, parameter :: n_trinomial = 100, n_dbinomial=1000, n_triag=500

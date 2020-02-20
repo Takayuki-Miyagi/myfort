@@ -1,5 +1,5 @@
 module vector_complex
-  use general
+  use basic_types
   implicit none
 
   public :: CVec

@@ -1,7 +1,6 @@
 module general
-  use, intrinsic :: iso_fortran_env
+  use basic_types
   implicit none
-  integer(int32) :: iseed(4) = (/3239, 4241, 1903, 1093/)
   public :: sys   ! useful methods
   public :: iList ! integer list
   public :: cList ! str list
@@ -9,7 +8,6 @@ module general
   public :: imap  ! key:str, val:int
   public :: cmap  ! key:str, val:str
   public :: dmap  ! key:str, val:double
-  public :: iseed ! seed of the random number
 
   private :: mkdir, i2str, real2str, str2str
   private :: find, split, isfile_stop, isfile_func

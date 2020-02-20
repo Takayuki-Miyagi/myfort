@@ -1,5 +1,5 @@
 module physics_constants
-  use general
+  use basic_types
   real(real64), parameter, public :: pi = 3.141592741012573d0 ! \pi
   real(real64), parameter, public :: hc = 197.32705d0         ! \hbar c [MeV fm] or [eV nm]
   real(real64), public :: amp = 938.27231d0        ! proton mass [MeV] can be changed in LQCD calc.
