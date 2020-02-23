@@ -1,28 +1,59 @@
 program test
   use myfort
   implicit none
-  type(sys) :: s
-  type(tree) :: map
-  class(*), pointer :: a
-  character(:), allocatable :: b
-  type(DVec) :: v,vv
   call timer%init()
 
-  call test_LA()
+  !call test_LA()
+  !call test_renormalization()
+  call test_myfort_types()
 
   !call test_wfs()
   !call test_iteration_methods()
 
-  !call add_element(map, "aaaaa", "bbbbb")
-  !call print_key(map)
-  !call print_val(map)
-  !v = [1.d0,2.d0,3.d0]
-  !allocate(a, source=v)
-  !vv = a
-  !call vv%prnt()
-
   call timer%prt()
 contains
+
+  subroutine test_myfort_types()
+    type(sys) :: s
+    type(tree) :: map
+    class(*), pointer :: a
+    character(:), allocatable :: b
+    type(DVec) :: v,vv
+    v = [1.d0,2.d0,3.d0]
+    allocate(a, source=v)
+    vv = a
+    call vv%prnt()
+  end subroutine test_myfort_types
+
+  subroutine test_renormalization()
+    type(DMat) :: m, gen
+    type(SRGSolver) :: srg
+    type(LeeSuzukiSolver) :: ls
+    integer :: n, i
+    real(8) :: alpha=1.d0
+    n = 10
+    call m%rndm(n,n)
+    call gen%zeros(n,n)
+    m = m + m%t()
+    do i = 1, n
+      gen%m(i,i) = m%m(i,i)
+    end do
+    call srg%init( m, "Hflow" )
+    call srg%h%prnt(" before flow ")
+    call gen%prnt(" generator ")
+    call srg%SRGFlow( m, gen, alpha )
+    call srg%h%prnt(" after flow ")
+    call srg%fin()
+
+    call m%rndm(n,n)
+    m = m + m%t()
+    call ls%init( m )
+    call m%prnt( "before LS decoupling" )
+    call ls%LeeSuzuki( 2, 2, n-2-2, m )
+    call ls%H%prnt( "after LS decoupling" )
+    call ls%fin()
+
+  end subroutine test_renormalization
 
   subroutine test_LA()
     type(SVec) :: sv1, sv2
@@ -31,6 +62,7 @@ contains
     type(SMat) :: sm1, sm2
     type(DMat) :: dm1, dm2
     type(CMat) :: cm1, cm2
+    type(EigenSolSymD) :: dsol
 
 
     write(*,*) " test linear-algebra library "
@@ -41,8 +73,8 @@ contains
     call sv1%prnt("1st svec")
     call sv2%prnt("2nd svec")
     sm1 = sv1 .x. sv2
-    sm2 = sv2 .x. sv1
     call sm1%prnt("v1 x v2")
+    sm2 = sv2 .x. sv1
     call sm2%prnt("v2 x v1")
     sm1 = sm1 * sm2
     call sm1%prnt("m1 * m2")
@@ -50,6 +82,11 @@ contains
     call sv1%prnt("(v2 x v1) * v2")
     sv1 = sv2 * sm2
     call sv1%prnt("v2 * (v2 x v1)")
+
+    call sm1%rndm(3,3)
+    sm2 = sm1%inv()
+    sm1 = sm1 * sm2
+    call sm1%prnt(" Mat * Mat-1")
 
     write(*,*)
     write(*,*) " double precision"
@@ -68,6 +105,21 @@ contains
     call dv1%prnt("(v2 x v1) * v2")
     dv1 = dv2 * dm2
     call dv1%prnt("v2 * (v2 x v1)")
+
+    call dm1%rndm(3,3)
+    dm2 = dm1 + dm1%t()
+    call dm2%prnt(" Mat ")
+    call dsol%init( dm2 )
+    call dsol%DiagSym( dm2 )
+    call dsol%eig%prnt("EigenValues")
+    call dsol%vec%prnt("EigenVectors")
+    call dm1%diag( dsol%eig )
+    dm2 = dsol%vec * dm1 * dsol%vec%T()
+    call dm2%prnt(" U D U-1 ")
+    call dm1%rndm(3,3)
+    dm2 = dm1%inv()
+    dm1 = dm1 * dm2
+    call dm1%prnt(" Mat * Mat-1")
   end subroutine test_LA
 
   subroutine test_wfs()

@@ -523,7 +523,7 @@ contains
     integer(int32) :: n, m
     n = a%n_size
     m = b%n_size
-    call c%ini(n,m)
+    call c%zeros(n,m)
     call sger(n, m, 1.0, a%v, 1, b%v, 1, c%m, n)
   end function outer_product_smat
 
@@ -670,7 +670,7 @@ contains
       stop
     end if
     n = b%n_col
-    call c%ini(m,n)
+    call c%zeros(m,n)
     call dgemm('n','n',m,n,k,1.d0,a%m,m,b%m,k,0.d0,c%m,m)
   end function product_dmat
 
@@ -702,9 +702,9 @@ contains
     m = a%n_row
     n = a%n_col
     if(m < 1 .or. n < 1) return
-    call copy_dmat(c, a)
+    call copy_dmat(c,a)
     do i = 1, n
-      call saxpy(m, -1.d0, b%m(:,i), 1, c%m(:,i), 1)
+      call daxpy(m, -1.d0, b%m(:,i), 1, c%m(:,i), 1)
     end do
   end function subtract_dmat
 
@@ -854,7 +854,7 @@ contains
     integer(int32) :: n, m
     n = a%n_size
     m = b%n_size
-    call c%ini(n,m)
+    call c%zeros(n,m)
     call dger(n, m, 1.d0, a%v, 1, b%v, 1, c%m, n)
   end function outer_product_dmat
 
@@ -1204,7 +1204,7 @@ contains
     integer(int32) :: n, m
     n = a%n_size
     m = b%n_size
-    call c%ini(n,m)
+    call c%zeros(n,m)
     call zgeru(n, m, (1.d0,0.d0), a%v, 1, b%v, 1, c%m, n)
   end function outer_product_cmat
 

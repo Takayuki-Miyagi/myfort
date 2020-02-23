@@ -13,5 +13,6 @@ module myfort
   use linear_algebra
   use iteration_methods
   use associate_array
+  use renormalization
 
 end module myfort
