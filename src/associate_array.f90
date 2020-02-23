@@ -10,8 +10,8 @@ module associate_array
   type :: tree
     type(tree), pointer :: left => null()
     type(tree), pointer :: right => null()
-    class(*), allocatable :: key
-    class(*), allocatable :: val
+    class(*), pointer :: key
+    class(*), pointer :: val
   end  type tree
 contains
   subroutine add_element( this, key, val)
@@ -21,6 +21,11 @@ contains
     allocate(this%key, source=key)
     allocate(this%val, source=val)
   end subroutine add_element
+
+  subroutine get_int( this, val)
+    class(tree), intent(inout) :: this
+    integer, intent(out) :: val
+  end  subroutine get_int
 
   subroutine print_key( this, iunit )
     class(tree), intent(in), target :: this

@@ -1,23 +1,15 @@
 obj/profiler.o : src/profiler.f90 obj/general.o obj/basic_types.o 
-obj/mat_vec_single.o : src/mat_vec_single.f90 obj/matrix_single.o obj/vector_single.o obj/basic_types.o 
+obj/vector_definitions.o : src/vector_definitions.f90 obj/basic_types.o 
 obj/wave_functions.o : src/wave_functions.f90 obj/physics_constants.o obj/functions_from_c.o obj/basic_types.o 
-obj/vector_double.o : src/vector_double.f90 obj/basic_types.o 
-obj/mat_vec_complex.o : src/mat_vec_complex.f90 obj/matrix_complex.o obj/vector_complex.o obj/general.o 
+obj/matrix_definitions.o : src/matrix_definitions.f90 obj/vector_definitions.o obj/basic_types.o 
 obj/associate_array.o : src/associate_array.f90 obj/basic_types.o 
-obj/sngl_dble_cmplx.o : src/sngl_dble_cmplx.f90 obj/matrix_complex.o obj/vector_complex.o obj/matrix_double.o obj/vector_double.o obj/matrix_single.o obj/vector_single.o 
-obj/matrix_double.o : src/matrix_double.f90 obj/vector_double.o obj/basic_types.o 
-obj/vector_single.o : src/vector_single.f90 obj/basic_types.o 
+obj/flexible_arrays.o : src/flexible_arrays.f90 obj/linear_algebra.o obj/basic_types.o 
 obj/angular_momentum_couplings.o : src/angular_momentum_couplings.f90 obj/functions_from_c.o obj/basic_types.o 
-obj/vector_complex.o : src/vector_complex.f90 obj/basic_types.o 
-obj/mat_vec_double.o : src/mat_vec_double.f90 obj/matrix_double.o obj/vector_double.o obj/general.o 
-obj/matrix_single.o : src/matrix_single.f90 obj/vector_single.o obj/basic_types.o 
 obj/store_couplings.o : src/store_couplings.f90 obj/angular_momentum_couplings.o obj/functions_from_c.o obj/profiler.o obj/basic_types.o 
-obj/myfort_types.o : src/myfort_types.f90 
-obj/linear_algebra.o : src/linear_algebra.f90 obj/mat_vec_complex.o obj/mat_vec_double.o obj/mat_vec_single.o obj/matrix_complex.o obj/matrix_double.o obj/matrix_single.o obj/vector_complex.o obj/vector_double.o obj/vector_single.o obj/sngl_dble_cmplx.o obj/basic_types.o 
+obj/linear_algebra.o : src/linear_algebra.f90 obj/matrix_definitions.o obj/vector_definitions.o obj/basic_types.o 
 obj/physics_constants.o : src/physics_constants.f90 obj/basic_types.o 
 obj/basic_types.o : src/basic_types.f90 
 obj/iteration_methods.o : src/iteration_methods.f90 obj/linear_algebra.o 
 obj/functions_from_c.o : src/functions_from_c.f90 
-obj/matrix_complex.o : src/matrix_complex.f90 obj/vector_complex.o obj/basic_types.o 
 obj/myfort.o : src/myfort.f90 obj/associate_array.o obj/iteration_methods.o obj/linear_algebra.o obj/wave_functions.o obj/profiler.o obj/physics_constants.o obj/general.o obj/store_couplings.o obj/angular_momentum_couplings.o obj/functions_from_c.o 
 obj/general.o : src/general.f90 obj/basic_types.o 

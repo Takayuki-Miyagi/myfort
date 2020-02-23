@@ -1,11 +1,6 @@
 module flexible_arrays
   use basic_types
-  use vector_single
-  use vector_double
-  use vector_complex
-  use matrix_single
-  use matrix_double
-  use matrix_complex
+  use linear_algebra
 
   type :: list
     type(list), pointer :: next => null()

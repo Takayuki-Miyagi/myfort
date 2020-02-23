@@ -3,66 +3,72 @@ program test
   implicit none
   type(sys) :: s
   type(tree) :: map
+  class(*), pointer :: a
+  character(:), allocatable :: b
+  type(DVec) :: v,vv
   call timer%init()
 
-  !call test_SVec()
-  !call test_SMat()
-
-  !call test_DVec()
-  !call test_DMat()
+  call test_LA()
 
   !call test_wfs()
-  call test_iteration_methods()
+  !call test_iteration_methods()
 
-  call add_element(map, "aaaaa", 2)
-  call print_key(map)
-  call print_val(map)
+  !call add_element(map, "aaaaa", "bbbbb")
+  !call print_key(map)
+  !call print_val(map)
+  !v = [1.d0,2.d0,3.d0]
+  !allocate(a, source=v)
+  !vv = a
+  !call vv%prnt()
 
   call timer%prt()
 contains
-  subroutine test_SVec()
-    type(SVec) :: a, b, c
-    real(4) :: v
-    integer :: n = 2
-    write(*,*) "# test single-vector"
-    call a%Random(n)
-    call b%Random(n)
 
-    call a%prt('a')
-    call b%prt('b')
-    write(*,'(a, f12.6)') 'a * b = ', a * b
-  end subroutine test_SVec
+  subroutine test_LA()
+    type(SVec) :: sv1, sv2
+    type(DVec) :: dv1, dv2
+    type(CVec) :: cv1, cv2
+    type(SMat) :: sm1, sm2
+    type(DMat) :: dm1, dm2
+    type(CMat) :: cm1, cm2
 
-  subroutine test_SMat()
-    type(SMat) :: a, b, c
-    integer :: n = 2
 
-    write(*,*) "# test single-matrix"
-    call a%Random(n,n)
-    call b%Random(n,n)
-    c = a + b
-    call c%prt(iunit=6,msg='a + b')
-  end subroutine test_SMat
+    write(*,*) " test linear-algebra library "
+    write(*,*) " single precision"
+    write(*,*)
+    call sv1%rndm(3)
+    call sv2%rndm(3)
+    call sv1%prnt("1st svec")
+    call sv2%prnt("2nd svec")
+    sm1 = sv1 .x. sv2
+    sm2 = sv2 .x. sv1
+    call sm1%prnt("v1 x v2")
+    call sm2%prnt("v2 x v1")
+    sm1 = sm1 * sm2
+    call sm1%prnt("m1 * m2")
+    sv1 = sm2 * sv2
+    call sv1%prnt("(v2 x v1) * v2")
+    sv1 = sv2 * sm2
+    call sv1%prnt("v2 * (v2 x v1)")
 
-  subroutine test_DVec()
-    type(DVec) :: a, b, c
-    integer :: n = 2
-    write(*,*) "# test double-vector"
-    call a%Random(n)
-    call b%Random(n)
-    write(*,'(a, f12.6)') 'a * b = ', a * b
-  end subroutine test_DVec
-
-  subroutine test_DMat()
-    type(DMat) :: a, b, c
-    integer :: n = 2
-
-    write(*,*) "# test double-matrix"
-    call a%Random(n,n)
-    call b%Random(n,n)
-    c = a + b
-    call c%prt(iunit=6,msg='a + b')
-  end subroutine test_DMat
+    write(*,*)
+    write(*,*) " double precision"
+    write(*,*)
+    call dv1%rndm(3)
+    call dv2%rndm(3)
+    call dv1%prnt("1st dvec")
+    call dv2%prnt("2nd dvec")
+    dm1 = dv1 .x. dv2
+    dm2 = dv2 .x. dv1
+    call dm1%prnt("v1 x v2")
+    call dm2%prnt("v2 x v1")
+    dm1 = dm1 * dm2
+    call dm1%prnt("m1 * m2")
+    dv1 = dm2 * dv2
+    call dv1%prnt("(v2 x v1) * v2")
+    dv1 = dv2 * dm2
+    call dv1%prnt("v2 * (v2 x v1)")
+  end subroutine test_LA
 
   subroutine test_wfs()
     integer :: i, nmesh = 1000

@@ -1,99 +1,13 @@
 module linear_algebra
   use basic_types
-  use sngl_dble_cmplx
-  use vector_single
-  use vector_double
-  use vector_complex
-  use matrix_single
-  use matrix_double
-  use matrix_complex
-  use mat_vec_single
-  use mat_vec_double
-  use mat_vec_complex
+  use vector_definitions
+  use matrix_definitions
 
   implicit none
-
-  public :: assignment(=)
-  public :: operator(+)
-  public :: operator(-)
-  public :: operator(*)
-  public :: operator(/)
-  public :: operator(.x.)
   public :: EigenSolSymD
   public :: EigenSolHermite
   public :: exp
 
-  ! SVec methods
-  private :: VectorCopyS
-  private :: VectorSumS
-  private :: VectorSubtractS
-  private :: VectorScaleRS
-  private :: VectorScaleLS
-  private :: InnerProductS
-  private :: VectorDivideS
-  private :: OuterProductS
-
-  ! DVec methods
-  private :: VectorCopyD
-  private :: VectorSumD
-  private :: VectorSubtractD
-  private :: VectorScaleRD
-  private :: VectorScaleLD
-  private :: InnerProductD
-  private :: VectorDivideD
-  private :: OuterProductD
-
-  ! CVec methods
-  private :: VectorCopyC
-  private :: VectorSumC
-  private :: VectorSubtractC
-  private :: VectorScaleRC
-  private :: VectorScaleLC
-  private :: InnerProductC
-  private :: VectorDivideC
-  private :: OuterProductC
-
-  ! SMat methods
-  private :: MatrixCopyS
-  private :: MatrixSumS
-  private :: MatrixSubtractS
-  private :: MatrixScaleLS
-  private :: MatrixScaleRS
-  private :: MatrixProductS
-  private :: MatrixScaleDivideS
-
-  ! DMat methods
-  private :: MatrixCopyD
-  private :: MatrixSumD
-  private :: MatrixSubtractD
-  private :: MatrixScaleLD
-  private :: MatrixScaleRD
-  private :: MatrixProductD
-  private :: MatrixScaleDivideD
-
-  ! CMat methods
-  private :: MatrixCopyC
-  private :: MatrixSumC
-  private :: MatrixSubtractC
-  private :: MatrixScaleLC
-  private :: MatrixScaleRC
-  private :: MatrixProductC
-  private :: MatrixScaleDivideC
-
-  private :: DVec2SVec
-  private :: SVec2DVec
-  private :: SMat2DMat
-  private :: DMat2SMat
-
-  ! MatVec single
-  private :: MVProductS
-  private :: VMProductS
-  ! MatVec double
-  private :: MVProductD
-  private :: VMProductD
-  ! MatVec complex
-  private :: MVProductC
-  private :: VMProductC
 
   ! diagonalization methods
   private :: InitEigenSolSymD
@@ -104,89 +18,6 @@ module linear_algebra
   private :: FinEigenSolHermite
   private :: DiagHermite
   !private :: EigenvalHermite
-
-  interface assignment(=)
-    module procedure :: VectorCopyD
-    module procedure :: VectorCopyS
-    module procedure :: VectorCopyC
-    module procedure :: MatrixCopyS
-    module procedure :: MatrixCopyD
-    module procedure :: MatrixCopyC
-    ! single <-> double <-> complex vector
-    module procedure :: DVec2SVec
-    module procedure :: SVec2DVec
-    module procedure :: SVec2CVec
-    module procedure :: DVec2CVec
-    module procedure :: CVec2DVecReal
-    module procedure :: CVec2SVecReal
-    ! single <-> double <-> complex matrix
-    module procedure :: SMat2DMat
-    module procedure :: DMat2SMat
-    module procedure :: SMat2CMat
-    module procedure :: DMat2CMat
-    module procedure :: CMat2DMatReal
-    module procedure :: CMat2SMatReal
-  end interface assignment(=)
-
-  interface operator(+)
-    module procedure :: VectorSumD
-    module procedure :: VectorSumS
-    module procedure :: VectorSumC
-    module procedure :: MatrixSumS
-    module procedure :: MatrixSumD
-    module procedure :: MatrixSumC
-  end interface operator(+)
-
-  interface operator(-)
-    module procedure :: VectorSubtractD
-    module procedure :: VectorSubtractS
-    module procedure :: VectorSubtractC
-    module procedure :: MatrixSubtractS
-    module procedure :: MatrixSubtractD
-    module procedure :: MatrixSubtractC
-  end interface operator(-)
-
-  interface operator(*)
-    module procedure :: VectorScaleRD
-    module procedure :: VectorScaleRS
-    module procedure :: VectorScaleRC
-    module procedure :: VectorScaleLS
-    module procedure :: VectorScaleLD
-    module procedure :: VectorScaleLC
-    module procedure :: InnerProductS
-    module procedure :: InnerProductD
-    module procedure :: InnerProductC
-    module procedure :: MatrixScaleLS
-    module procedure :: MatrixScaleLC
-    module procedure :: MatrixScaleLD
-    module procedure :: MatrixScaleRS
-    module procedure :: MatrixScaleRC
-    module procedure :: MatrixScaleRD
-    module procedure :: MatrixProductS
-    module procedure :: MatrixProductC
-    module procedure :: MatrixProductD
-    module procedure :: MVProductS
-    module procedure :: VMProductS
-    module procedure :: MVProductD
-    module procedure :: VMProductD
-    module procedure :: MVProductC
-    module procedure :: VMProductC
-  end interface operator(*)
-
-  interface operator(/)
-    module procedure :: VectorDivideD
-    module procedure :: VectorDivideS
-    module procedure :: VectorDivideC
-    module procedure :: MatrixScaleDivideS
-    module procedure :: MatrixScaleDivideD
-    module procedure :: MatrixScaleDivideC
-  end interface operator(/)
-
-  interface operator(.x.)
-    module procedure :: OuterProductD
-    module procedure :: OuterProductS
-    module procedure :: OuterProductC
-  end interface operator(.x.)
 
   interface exp
     module procedure :: ExpD, ExpC
@@ -551,7 +382,7 @@ contains
     call r%eye(size(a%m, 1))
     b = r
     do i = 1, iord
-      b = b * a / dble(i)
+      b = b * a / (cmplx(i,kind=real64))
       r = r + b
     end do
   end function ExpC
