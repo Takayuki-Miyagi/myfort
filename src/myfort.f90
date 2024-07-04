@@ -12,7 +12,7 @@ module myfort
   use wave_functions
   use linear_algebra
   use iteration_methods
-  use associate_array
   use renormalization
+  !use associate_array 
 
 end module myfort

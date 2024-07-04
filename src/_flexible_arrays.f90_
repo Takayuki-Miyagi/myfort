@@ -1,6 +1,5 @@
 module flexible_arrays
   use basic_types
-  use linear_algebra
 
   type :: list
     type(list), pointer :: next => null()

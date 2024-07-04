@@ -1,6 +1,6 @@
 module store_couplings
+  use, intrinsic :: iso_fortran_env
   use omp_lib
-  use basic_types
   use profiler
   use functions_from_c
   use angular_momentum_couplings

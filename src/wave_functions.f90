@@ -1,5 +1,4 @@
 module wave_functions
-  use basic_types
   use functions_from_c
   use physics_constants
   implicit none

@@ -475,9 +475,9 @@ contains
     if(info .ne. 0) return
     call sol%fin()
     this%S = Omega2S(ndim_ex, npdim, nqdim, omg)
-    call omg%fin()
-    this%expS = exp(this%S)
+    this%expS = Omega2ExpS(ndim_ex, npdim, nqdim, omg)
     this%H = this%expS%T() * h * this%expS
+    call omg%fin()
     call timer%add('Lee-Suzuki mthod', omp_get_wtime() - ti)
   contains
     type(DMat) function Omega_LeeSuzuki(wave, n, npdim, nqdim, info) result(omg)
@@ -562,5 +562,61 @@ contains
         end do
       end do
     end function Omega2S
+
+    type(DMat) function Omega2ExpS(nex, np, nq, omg) result(ExpS)
+      integer(int32), intent(in) :: nex, np, nq
+      type(DMat), intent(in) :: omg
+      integer :: i
+      real(real64) :: a
+      type(DVec) :: mu2
+      type(DMat) :: omTom, tmp
+      type(DMat) :: alpha ! < p | alpha > 
+      type(DMat) :: nu    ! < q | nu >
+      type(EigenSolSymD) :: sol
+      
+      call ExpS%eye(nex + np + nq)
+      omTom = omg%T() * omg
+      call sol%Init(omTom); call sol%DiagSym(omTom)
+      mu2 = sol%eig
+      alpha = sol%vec
+      nu = omg * alpha
+      call sol%fin()
+
+      ! P - P
+      call tmp%zeros(np,np)
+      do i = 1, np
+        tmp%m(:,i) = 1.d0 / sqrt(1.d0 + mu2%v(i)) * alpha%m(:,i)
+      end do
+      tmp = tmp * alpha%t()
+      ExpS%m(nex+1:nex+np, nex+1:nex+np) = tmp%m(:,:)
+      call tmp%fin()
+
+      ! P - Q
+      call tmp%zeros(np,np)
+      do i = 1, np
+        tmp%m(:,i) = 1.d0 / sqrt(1.d0 + mu2%v(i)) * alpha%m(:,i)
+      end do
+      tmp = tmp * nu%t()
+      ExpS%m(nex+1:nex+np, nex+np+1:nex+np+nq) = -tmp%m(:,:)
+      ExpS%m(nex+np+1:nex+np+nq, nex+1:nex+np) = transpose(tmp%m(:,:))
+      call tmp%fin()
+
+      ! Q - Q
+      call tmp%zeros(nq,np)
+      do i = 1, np
+        if(abs(mu2%v(i)) > 1.d-8) then
+          a = (1.d0 / sqrt(1.d0 + mu2%v(i)) - 1.d0) / mu2%v(i)
+        else
+          a = -0.5d0
+        end if
+        tmp%m(:,i) = a * nu%m(:,i)
+      end do
+      tmp = tmp * nu%t()
+      ExpS%m(nex+np+1:nex+np+nq, nex+np+1:nex+np+nq) = tmp%m(:,:)
+      call tmp%fin()
+      do i = 1, nq
+        ExpS%m(nex+np+i, nex+np+i) = ExpS%m(nex+np+i, nex+np+i) + 1.d0
+      end do
+    end function Omega2ExpS
   end subroutine LeeSuzuki
 end module Renormalization

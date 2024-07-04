@@ -1,5 +1,4 @@
 module matrix_definitions
-  use basic_types
   use vector_definitions
   implicit none
 

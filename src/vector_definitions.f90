@@ -1,5 +1,6 @@
 module vector_definitions
-  use basic_types
+  use general
+  use, intrinsic :: iso_fortran_env
   implicit none
 
   private :: initialize_svec

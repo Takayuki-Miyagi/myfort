@@ -14,7 +14,7 @@ endif
 
 ifeq ($(FC),gfortran)
   ifeq ($(OS), OSX)
-    LFLAGS+= -I/usr/local/include -L/usr/local/lib
+    LFLAGS+= -I/usr/local/include -L/usr/local/lib -I/opt/homebrew/include -L/opt/homebrew/lib
   endif
   LFLAGS+= -lblas -llapack -lgsl -lz
   FFLAGS+= -O3 -fopenmp -fPIC
@@ -73,7 +73,7 @@ $(OBJDIR)/%.o:$(SRCDIR)/%.f90
 
 
 test:
-	$(FC) test.f90 -o test.exe -I$(INSTLDIR)/include/myfort -lmyfort
+	$(FC) test.f90 -o test.exe -I$(INSTLDIR)/include/myfort -L/$(INSTLDIR)/lib -lmyfort
 
 dep:
 	$(FDEP) $(SRCS_ALL) -b $(OBJDIR)/ > makefile.d
@@ -96,8 +96,8 @@ install:
 	@if [ ! -d $(INSTLDIR)/lib ] ; then \
 	  mkdir $(INSTLDIR)/lib; \
 	fi
-	@if [ ! -d $(INSTLDIR)/include ] ; then \
-	  mkdir $(INSTLDIR)/include; \
+	@if [ ! -d $(INSTLDIR)/include/myfort ] ; then \
+	  mkdir $(INSTLDIR)/include/myfort; \
 	fi
 	ln -sf $(PWD)/libmyfort.so $(INSTLDIR)/lib/libmyfort.so
 	@for f in $(MODDIR)/*.mod; do \
@@ -112,5 +112,6 @@ clean:
 	@if [ -d $(OBJDIR) ] ; then rm -r $(OBJDIR); fi
 	@if [ -d $(MODDIR) ] ; then rm -r $(MODDIR); fi
 	rm -f libmyfort.so
+	rm -f test.exe
 #--------------------------------------------------
 -include $(wildcard *.d)

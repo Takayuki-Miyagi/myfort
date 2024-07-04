@@ -4,8 +4,8 @@ program test
   call timer%init()
 
   !call test_LA()
-  !call test_renormalization()
-  call test_myfort_types()
+  call test_renormalization()
+  !call test_myfort_types()
 
   !call test_wfs()
   !call test_iteration_methods()
@@ -13,17 +13,17 @@ program test
   call timer%prt()
 contains
 
-  subroutine test_myfort_types()
-    type(sys) :: s
-    type(tree) :: map
-    class(*), pointer :: a
-    character(:), allocatable :: b
-    type(DVec) :: v,vv
-    v = [1.d0,2.d0,3.d0]
-    allocate(a, source=v)
-    vv = a
-    call vv%prnt()
-  end subroutine test_myfort_types
+!  subroutine test_myfort_types()
+!    type(sys) :: s
+!    type(tree) :: map
+!    class(*), pointer :: a
+!    character(:), allocatable :: b
+!    type(DVec) :: v,vv
+!    v = [1.d0,2.d0,3.d0]
+!    allocate(a, source=v)
+!    vv = a
+!    call vv%prnt()
+!  end subroutine test_myfort_types
 
   subroutine test_renormalization()
     type(DMat) :: m, gen
@@ -49,7 +49,7 @@ contains
     m = m + m%t()
     call ls%init( m )
     call m%prnt( "before LS decoupling" )
-    call ls%LeeSuzuki( 2, 2, n-2-2, m )
+    call ls%LeeSuzuki( 2, 4, n-2-4, m )
     call ls%H%prnt( "after LS decoupling" )
     call ls%fin()
 

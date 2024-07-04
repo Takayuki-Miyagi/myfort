@@ -1,38 +1,47 @@
 module general
-  use basic_types
+  use, intrinsic :: iso_fortran_env
   implicit none
   public :: sys   ! useful methods
+  public :: str   ! string type
   public :: iList ! integer list
   public :: cList ! str list
   public :: dList ! double list
   public :: imap  ! key:str, val:int
   public :: cmap  ! key:str, val:str
   public :: dmap  ! key:str, val:double
+  public :: iseed
+  public :: assignment(=)
+  public :: operator(+)
+  private
 
-  private :: mkdir, i2str, real2str, str2str
-  private :: find, split, isfile_stop, isfile_func
-  private :: GetLength_iList, append_iList, print_iList
-  private :: GetLength_cList, append_cList, print_cList
-  private :: GetLength_dList, append_dList, print_dList
-  private :: GetLength_imap, append_imap, print_imap, Get_imap, Search_imap
-  private :: GetLength_cmap, append_cmap, print_cmap, Get_cmap, Search_cmap
-  private :: GetLength_dmap, append_dmap, print_dmap, Get_dmap, Search_dmap
-  private :: search_key, skip_comments
 
   type :: sys
   contains
     procedure :: mkdir
-    procedure :: i2str
-    procedure :: real2str
-    procedure :: str2str
-    generic :: str => i2str, real2str, str2str
+    procedure :: sys_i2str
+    procedure :: sys_d2str
+    procedure :: sys_f2str
+    procedure :: sys_char2str
+    procedure :: sys_str2i
+    procedure :: sys_str2d
+    procedure :: sys_str2f
     procedure :: find
     procedure :: split
     procedure :: isfile_stop
     procedure :: isfile_func
+    procedure :: sort
+    procedure :: sorted_index
     procedure :: skip_comments
+    generic :: str => sys_i2str, sys_d2str, sys_f2str, sys_char2str
+    generic :: dbl => sys_str2d
+    generic :: flt => sys_str2f
+    generic :: itg => sys_str2i
     generic :: isfile => isfile_stop, isfile_func
   end type sys
+
+  type :: str
+    character(:), allocatable :: val
+  end type str
 
   type :: iList
     integer(int32), allocatable :: i(:)
@@ -92,6 +101,26 @@ module general
     procedure :: Search => Search_dmap
   end type dmap
 
+  interface assignment(=)
+    module procedure :: char2str
+    module procedure :: str2char
+    module procedure :: str2str
+    module procedure :: i2str
+    module procedure :: d2str
+    module procedure :: f2str
+    module procedure :: str2i
+    module procedure :: str2d
+    module procedure :: str2f
+  end interface assignment(=)
+
+  interface operator(+)
+    module procedure :: combine_str_str
+    module procedure :: combine_str_char
+    module procedure :: combine_char_str
+  end interface operator(+)
+
+  integer(int32) :: iseed(4) = (/3239, 4241, 1903, 1093/) ! seed of random numbers
+
 contains
 
   subroutine mkdir(this, dir)
@@ -121,83 +150,215 @@ contains
     call system(comm(1:ie))
   end subroutine mkdir
 
-  function i2str(this, i)
+  function sys_char2str(this, cha) result(string)
     class(sys), intent(in) :: this
-    character(:), allocatable :: i2str
-    character(Lenc) :: ist
-    integer(int32), intent(in) :: i
-    write(ist,*) i
-    i2str=adjustl(trim(ist))
-  end function i2str
+    character(*), intent(in) :: cha
+    type(str) :: string
+    string = cha
+  end function sys_char2str
 
-  function real2str(this, r) result(str)
+  function sys_i2str(this, i) result(string)
     class(sys), intent(in) :: this
-    character(:), allocatable :: str
-    character(Lenc) ::  rst
-    real(real64), intent(in) :: r
-    integer(int32) :: l
-    l = int(log10(abs(r) + 1.d-8))
-    if(l >= 1) then
-      write(rst, *) int(r)
-    elseif(l < 1 .and. l >= 0) then
-      write(rst, '(f10.2)') r
-    elseif(l < 0 .and. l >= -1) then
-      write(rst, '(f10.3)') r
-    elseif(l < -1 .and. l >= -2) then
-      write(rst, '(f10.4)') r
-    elseif(l < -2 .and. l >= -3) then
-      write(rst, '(f10.5)') r
-    elseif(l < -3 .and. l >= -4) then
-      write(rst, '(f10.6)') r
-    elseif(l < -4 .and. l >= -5) then
-      write(rst, '(f10.7)') r
-    elseif(l < -5 .and. l >= -6) then
-      write(rst, '(f10.8)') r
-    elseif(l < -6 .and. l >= -7) then
-      write(rst, '(f10.9)') r
-    else
-      rst = "0"
+    integer, intent(in) :: i
+    type(str) :: string
+    string = i
+  end function sys_i2str
+
+  function sys_d2str(this, d) result(string)
+    class(sys), intent(in) :: this
+    real(8), intent(in) :: d
+    type(str) :: string
+    string = d
+  end function sys_d2str
+
+  function sys_f2str(this, f) result(string)
+    class(sys), intent(in) :: this
+    real(4), intent(in) :: f
+    type(str) :: string
+    string = f
+  end function sys_f2str
+
+  function sys_str2i(this, string) result(i)
+    class(sys), intent(in) :: this
+    type(str), intent(in) :: string
+    integer :: i
+    i = string
+  end function sys_str2i
+
+  function sys_str2d(this, string) result(d)
+    class(sys), intent(in) :: this
+    type(str), intent(in) :: string
+    real(8) :: d
+    d = string
+  end function sys_str2d
+
+  function sys_str2f(this, string) result(f)
+    class(sys), intent(in) :: this
+    type(str), intent(in) :: string
+    real(4) :: f
+    f = string
+  end function sys_str2f
+
+  subroutine i2str(string, i)
+    integer, intent(in) :: i
+    type(str), intent(out) :: string
+    character(range(i)+3) :: tmp
+    write(tmp,*) i
+    string = trim(adjustl(tmp))
+  end subroutine i2str
+
+  subroutine str2i(i, string)
+    integer, intent(out) :: i
+    type(str), intent(in) :: string
+    character(:), allocatable :: tmp
+    tmp = string
+    read(tmp,*) i
+  end subroutine str2i
+
+  subroutine str2f(f, string)
+    real(4), intent(out) :: f
+    type(str), intent(in) :: string
+    character(:), allocatable :: tmp
+    tmp = string
+    read(tmp,*) f
+  end subroutine str2f
+
+  subroutine str2d(d, string)
+    real(8), intent(out) :: d
+    type(str), intent(in) :: string
+    character(:), allocatable :: tmp
+    tmp = string
+    read(tmp,*) d
+  end subroutine str2d
+
+  subroutine d2str(string, r)
+    real(8), intent(in) :: r
+    type(str), intent(out) :: string
+    integer, parameter :: fmax = 8
+    character(100) :: rst, fmt, tmp
+    integer :: i
+    do i = 0, fmax
+    if(abs(r-rnd(r, i)) < 1.d-16 .or. i==fmax) then
+      if(i==0) then
+        write(rst,*) int(r)
+      else
+        write(tmp,*) i
+        fmt = "20." //  trim(adjustl(tmp))
+        write(rst, "(f"// adjustl(fmt) // ")")  r
+      end if
+      exit
     end if
-    str = adjustl(trim(rst))
-  end function real2str
+    end do
+    if(abs(r) < 10.d0**(-fmax)) rst = '0'
+    string= trim(adjustl(rst))
+  contains
+    function rnd(val, n) result(res)
+      real(8), intent(in) :: val
+      integer, intent(in) :: n
+      real(8) :: res
+      res = anint(val*10.d0**n) / 10.d0**n
+    end function rnd
+  end subroutine d2str
 
-  function str2str(this, str)
-    class(sys), intent(in) :: this
-    character(:), allocatable :: str2str
-    character(*), intent(in) :: str
-    str2str=adjustl(trim(str))
-  end function str2str
+  subroutine f2str(string, r)
+    real(4), intent(in) :: r
+    type(str), intent(out) :: string
+    integer, parameter :: fmax = 8
+    character(100) :: rst, fmt, tmp
+    integer :: i
+    do i = 0, fmax
+    if(abs(r-rnd(r, i)) < 1.d-16 .or. i==fmax) then
+      if(i==0) then
+        write(rst,*) int(r)
+      else
+        write(tmp,*) i
+        fmt = "20." //  trim(adjustl(tmp))
+        write(rst, "(f"// adjustl(fmt) // ")")  r
+      end if
+      exit
+    end if
+    end do
+    if(abs(r) < 10.d0**(-fmax)) rst = '0'
+    string= trim(adjustl(rst))
+  contains
+    function rnd(val, n) result(res)
+      real(4), intent(in) :: val
+      integer, intent(in) :: n
+      real(4) :: res
+      res = anint(val*10.d0**n) / 10.d0**n
+    end function rnd
+  end subroutine f2str
 
-  logical function find(this, str, key) result(r)
+  subroutine char2str(string, cha)
+    character(*), intent(in) :: cha
+    type(str), intent(out) :: string
+    string%val = trim(cha)
+  end subroutine char2str
+
+  subroutine str2char(cha, string)
+    type(str), intent(in) :: string
+    character(:), allocatable, intent(out) :: cha
+    cha = string%val
+  end subroutine str2char
+
+  subroutine str2str(str1, str2)
+    type(str), intent(in) :: str2
+    type(str), intent(out) :: str1
+    str1%val = str2%val
+  end subroutine str2str
+
+  function combine_str_str(str1, str2) result(str3)
+    type(str), intent(in) :: str1, str2
+    type(str) :: str3
+    str3%val = trim(str1%val) // trim(str2%val)
+  end function combine_str_str
+
+  function combine_str_char(str1, cha2) result(str3)
+    type(str), intent(in) :: str1
+    character(*), intent(in) :: cha2
+    type(str) :: str2, str3
+    str2 = cha2
+    str3 = str1 + str2
+  end function combine_str_char
+
+  function combine_char_str(cha1, str2) result(str3)
+    character(*), intent(in) :: cha1
+    type(str), intent(in) :: str2
+    type(str) :: str1, str3
+    str1 = cha1
+    str3 = str1 + str2
+  end function combine_char_str
+
+  logical function find(this, str1, key) result(r)
     class(sys), intent(in) :: this
-    character(*), intent(in) :: str, key
-    integer(int32) :: i
-    i = index(str, key)
+    type(str), intent(in) :: str1, key
+    integer :: i
+    i = index(str1%val, key%val)
     if(i == 0) r = .false.
     if(i /= 0) r = .true.
   end function find
 
-  subroutine split(this, str, key, splitted)
+  subroutine split(this, string, key, splitted)
     class(sys), intent(in) :: this
-    character(*), intent(in) :: str, key
-    character(Lenc), allocatable, intent(out) :: splitted(:)
-    integer(int32) :: len_key, n, i, n_elm
-    integer(int32), allocatable :: spos(:), epos(:)
-    len_key = len(key)
+    type(str), intent(in) :: string, key
+    type(str), allocatable, intent(out) :: splitted(:)
+    integer :: len_key, n, i, n_elm
+    integer, allocatable :: spos(:), epos(:)
+    len_key = len(key%val)
     n_elm = 0
     n = 0
-    do i = 1, len(str)-len_key+1
-      if(str(i:i+len_key-1) == key) n = n + 1
+    do i = 1, len(string%val)-len_key+1
+      if(string%val(i:i+len_key-1) == key%val) n = n + 1
     end do
     n_elm = n + 1
     allocate(splitted(n_elm))
     allocate(spos(n_elm))
     allocate(epos(n_elm))
     spos(1) = 1
-    epos(n_elm) = len(str)
+    epos(n_elm) = len(string%val)
     n = 0
-    do i = 1, len(str)-len_key+1
-      if(str(i:i+len_key-1) == key) then
+    do i = 1, len(string%val)-len_key+1
+      if(string%val(i:i+len_key-1) == key%val) then
         n = n + 1
         spos(n+1) = i+len_key
         epos(n) = i-1
@@ -205,9 +366,9 @@ contains
     end do
 
     do i = 1, n_elm-1
-      splitted(i) = str(spos(i):epos(i))
+      splitted(i) = trim( adjustl (string%val(spos(i):epos(i)) ))
     end do
-    splitted(n_elm) = trim(str(spos(n_elm):))
+    splitted(n_elm) = trim(adjustl(string%val(spos(n_elm):)))
     deallocate(spos, epos)
   end subroutine split
 
@@ -237,7 +398,7 @@ contains
     character(*), intent(in) :: comment
     character(20) :: line
     read(iunit,'(a)') line
-    do while  (this%find(line, comment))
+    do while  (this%find(this%str(line), this%str(comment)))
       read(iunit,'(a)') line
     end do
     backspace(iunit)
@@ -659,4 +820,58 @@ contains
       end if
     end do
   end function search_key
+
+  function sort(this, a, direction) result(r)
+    class(sys), intent(in) :: this
+    real(8), intent(in) :: a(:)
+    real(8), allocatable :: r(:)
+    character(*), optional, intent(in) :: direction
+    character(:), allocatable :: direc
+    logical, allocatable :: is(:)
+    integer :: i, n
+    direc = "ascending"
+    if(present(direction)) direc = direction
+    n = size(a)
+    allocate(r(n), is(n))
+    is(:) = .true.
+    if(direc=="ascending") then
+      do i = 1, n
+        r(i) = minval(a, dim=1, mask=is)
+        is(minloc(a, dim=1, mask=is)) = .false.
+      end do
+    else if(direc=="descending") then
+      do i = 1, n
+        r(i) = maxval(a, dim=1, mask=is)
+        is(maxloc(a, dim=1, mask=is)) = .false.
+      end do
+    end if
+    deallocate(is)
+  end function sort
+
+  function sorted_index(this, a, direction) result(r)
+    class(sys), intent(in) :: this
+    real(8), intent(in) :: a(:)
+    character(*), optional, intent(in) :: direction
+    integer, allocatable :: r(:)
+    character(:), allocatable :: direc
+    logical, allocatable :: is(:)
+    integer :: i, n
+    direc = "ascending"
+    if(present(direction)) direc = direction
+    n = size(a)
+    allocate(r(n), is(n))
+    is(:) = .true.
+    if(direc=="ascending") then
+      do i = 1, n
+        r(i) = minloc(a, dim=1, mask=is)
+        is(minloc(a, dim=1, mask=is)) = .false.
+      end do
+    else if(direc=="decending") then
+      do i = 1, n
+        r(i) = maxloc(a, dim=1, mask=is)
+        is(maxloc(a, dim=1, mask=is)) = .false.
+      end do
+    end if
+    deallocate(is)
+  end function sorted_index
 end module general

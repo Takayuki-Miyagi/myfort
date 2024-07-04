@@ -9,7 +9,6 @@ module basic_types
   private :: copy_complex64
   private :: copy_char
   private :: copy_logical
-  integer(int32) :: iseed(4) = (/3239, 4241, 1903, 1093/) ! seed of random numbers
   interface assignment(=)
     module procedure :: copy_int32
     module procedure :: copy_int64
